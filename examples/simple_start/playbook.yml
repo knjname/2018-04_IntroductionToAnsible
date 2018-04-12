@@ -1,0 +1,60 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+    # Fiwewalld を有効化
+    - name: enable firewalld
+      systemd:
+        name: firewalld
+        enabled: yes
+        state: started
+
+- hosts: db_server
+  become: true
+  tasks:
+    # PostgreSQL をインストール
+    - name: install postgresql
+      yum:
+        name: postgresql
+        state: present
+    # Firewalld で 5432 をオープン
+    - name: open postgresql port
+      firewalld:
+        port: "5432/tcp"
+        state: enabled
+        immediate: true
+        permanent: on
+
+- hosts: web_server
+  become: true
+  tasks:
+    # Web サーバ / PHP をインストール
+    - name: install httpd components
+      yum:
+        name: "{{item}}"
+        state: present
+      with_items:
+        - httpd
+        - php
+    # たちあげ
+    - name: enable httpd
+      systemd:
+        name: httpd
+        enabled: yes
+        state: started
+    # Firewalld で 80, 8080 をオープン
+    - name: open http port
+      firewalld:
+        port: "{{item}}/tcp"
+        state: enabled
+        immediate: true
+        permanent: on
+      with_items:
+        - 80
+        - 8080
+    # アプリのアップロード
+    - name: upload app
+      copy:
+        src: my_php_app
+        dest: /var/www/html

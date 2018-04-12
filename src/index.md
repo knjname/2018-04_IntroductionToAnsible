@@ -352,7 +352,7 @@ mapKey1: mapValue2
 * Windows はサポートされていない
 * [macOS / Linux / 一部の UNIX](http://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
 
-Python 製で、pip でインストールできます。
+プラットフォーム独立なインストール方法としては、Python の pip でインストールできます。
 
 ```console
 $ sudo pip install ansible
@@ -370,15 +370,65 @@ class: center, middle
 
 かなり前置きが長くなってしまいましたが、まずはシンプルに Ansible を使い始めてみましょう。
 
-```
-examples/simple_start/
+---
+
+## マシン準備
+
+遊び相手として 1 台 CentOS を用意します。
+
+```console
+$ cd examples/simple_start
+$ vagrant up
 ```
 
 ---
 
+## 単純に単発のコマンド（モジュール）を実行させてみる
+
+下記のファイルの設定を確認しましょう。
+
+```
+hosts ansible.cfg
+```
+
+コマンドを流してみましょう。
+
+```console
+# 応答チェック
+$ ansible -m ping web_server
+
+# コマンドの実行
+$ ansible -m command -a "whoami" web_server
+
+# rootに昇格して実行
+$ ansible -m command -b -a "whoami" web_server
+
+# yum で何か入れてみる
+$ ansible -m yum -b -a "name=uuid state=present" web_server
+$ ansible -m command -a "uuid" web_server
+```
+
 ---
 
-## 簡単な Web サーバを構築してみる
+## サーバの構成管理をしてみる
+
+下記のファイルの設定を確認しましょう。
+
+```
+playbook.yml
+```
+
+コマンドを流してみましょう。
+
+```console
+$ ansible-playbook playbook.yml
+# もう1回!
+$ ansible-playbook playbook.yml
+```
+
+Web ページが立ち上がっているはずです。
+
+http://192.168.50.2/my_php_app/
 
 ---
 
