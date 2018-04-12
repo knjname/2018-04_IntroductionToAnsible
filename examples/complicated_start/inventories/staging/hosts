@@ -1,0 +1,11 @@
+# Vagrant から生成された各ホストの秘密鍵を参照している
+
+[web_servers]
+stg_webserver_0 ansible_host=192.168.55.10 ansible_ssh_private_key_file=.vagrant/machines/{{inventory_hostname}}/virtualbox/private_key
+
+[db_servers]
+stg_dbserver_0 ansible_host=192.168.55.100 ansible_ssh_private_key_file=.vagrant/machines/{{inventory_hostname}}/virtualbox/private_key
+
+[all:vars]
+ansible_ssh_user=vagrant
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'

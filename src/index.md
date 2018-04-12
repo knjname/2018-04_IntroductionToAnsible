@@ -374,16 +374,21 @@ class: center, middle
 
 ## マシン準備
 
-遊び相手として 1 台 CentOS を用意します。
+遊び相手として CentOS \* 2 を用意します。
 
 ```console
 $ cd examples/simple_start
 $ vagrant up
 ```
 
+上記コマンドで、下記サーバが立ち上がり、 `vagrant` というユーザで公開鍵認証によりログインできるようになります。
+
+1. `webserver`: `192.168.50.2`
+2. `dbserver`: `192.168.50.3`
+
 ---
 
-## 単純に単発のコマンド（モジュール）を実行させてみる
+## 単純に単発のモジュールを実行させてみる
 
 下記のファイルの設定を確認しましょう。
 
@@ -394,16 +399,16 @@ hosts ansible.cfg
 コマンドを流してみましょう。
 
 ```console
-# 応答チェック
+# 応答チェック (pingモジュール)
 $ ansible -m ping web_server
 
-# コマンドの実行
+# コマンドの実行 (commandモジュール)
 $ ansible -m command -a "whoami" web_server
 
 # rootに昇格して実行
 $ ansible -m command -b -a "whoami" web_server
 
-# yum で何か入れてみる
+# yum で何か入れてみる (yumモジュール)
 $ ansible -m yum -b -a "name=uuid state=present" web_server
 $ ansible -m command -a "uuid" web_server
 ```
@@ -432,13 +437,69 @@ http://192.168.50.2/my_php_app/
 
 ---
 
-class: center, middle
+## シンプル編 まとめ
 
-# 私の体験談
+* Ansible で扱うエンティティ
+  * ホスト
+  * タスク
+  * [モジュール](http://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html), e.g. `yum` とか
+  * インベントリ = `hosts`
+  * プレイブック = `playbook.yml`
+* Ansible 実行をスムーズにするためには...
+  * Ansible 用ユーザを用意しておく
+  * 公開鍵で入れるようにしておく
+  * sudo で昇格できるようにしておく
 
 ---
 
-## 本番環境構築
+class: center, middle
+
+# Ansible をはじめる
+
+（やや複雑編）
+
+---
+
+## やや複雑編
+
+もう少しややこしい設定のサーバ群を立ち上げてみます。
+
+* ステージング
+  * Web \* 1
+  * DB \* 1
+* 本番
+  * Web \* 4
+  * DB \* 2
+
+立ち上げは前回と同様 `vagrant up` （8 台なので時間がかかります）
+
+---
+
+## 🐸 の大合唱
+
+複数台のマシンで一気にモジュールを実行してみましょう。
+
+```console
+$ ansible -i inventories/staging/hosts -m ping all
+$ ansible -i inventories/production/hosts -m ping all
+```
+
+---
+
+class: center, middle
+
+# 私の場合
+
+---
+
+## 実際に案件に Ansible 放り込んでます
+
+### 前提
+
+* 基本的にアプリは Docker で構成
+* よくある (?) フロント + API サーバ + DB サーバ + バッチ + α みたいな構成
+
+* Docker の設定ファイルとなる `docker-`アプリの
 
 ---
 

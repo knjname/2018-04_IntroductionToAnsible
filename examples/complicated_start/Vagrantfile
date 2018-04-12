@@ -1,0 +1,33 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+  [
+    { "name" => "stg", "web" => 1, "db" => 1, "ip" => "192.168.55" },
+    { "name" => "prd", "web" => 4, "db" => 2, "ip" => "192.168.56" }
+  ].each do |conf|
+
+    conf["web"].times do |ord|
+      config.vm.define("#{conf["name"]}_webserver_#{ord}") do |m|
+        m.vm.box = "centos/7"
+        m.vm.network "private_network", ip: "#{conf["ip"]}.#{10 + ord}"
+        m.vm.provider "virtualbox" do |vb|
+          vb.memory = "256"
+        end
+      end
+    end
+
+    conf["db"].times do |ord|
+      config.vm.define("#{conf["name"]}_dbserver_#{ord}") do |m|
+        m.vm.box = "centos/7"
+        m.vm.network "private_network", ip: "#{conf["ip"]}.#{100 + ord}"
+        m.vm.provider "virtualbox" do |vb|
+          vb.memory = "256"
+        end
+      end
+    end
+
+  end
+
+end
