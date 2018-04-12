@@ -1,0 +1,6 @@
+---
+
+- name: apply common configs to all the hosts
+  hosts: all
+  roles:
+    - common
