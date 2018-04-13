@@ -1,0 +1,29 @@
+---
+- name: install postgresql
+  become: true
+  yum:
+    name: postgresql-server
+    state: present
+
+- name: create initial db
+  become: true
+  command: postgresql-setup initdb
+  failed_when: false
+  changed_when: false
+
+- name: enable postgresql
+  become: true
+  systemd:
+    name: postgresql
+    enabled: yes
+    state: started
+
+- name: open up postgresql ports
+  become: true
+  firewalld:
+    port: "{{item}}/tcp"
+    state: enabled
+    immediate: true
+    permanent: on
+  with_items:
+    - 5432

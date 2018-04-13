@@ -560,6 +560,23 @@ $ ansible-playbook -i inventories/production/hosts site.yml
 
 ---
 
+## グループ、ロールで管理する
+
+1. 物理ホストをグループにわける
+2. グループごとに、どんな役割(ロール)を持っているか、設計する
+3. グループにロールをアサインする
+
+---
+
+## 今回触れなかったトピック
+
+* 冪等性
+  * Ansible 実行ごとに
+* ハンドラ
+  * 設定ファイルが変更された時にデーモンを再起動（もしくはリロード）するといった制御が可能になります
+
+---
+
 class: center, middle
 
 # 私と Ansible
@@ -598,11 +615,12 @@ class: center, middle
 
 ## 出会い始めのころの思い出
 
-* 適当にプレイブックを作って管理がつらくなって爆死した
+* 適当にプレイブックを作って管理がつらくなって何度か爆死した
   * [Ansible ベストプラクティス](http://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html) に沿えば大丈夫
-    * ただディレクトリはたくさんできる
-    * YAML もよう増える 仕方なし
-    * 値系は別 YAML に隔離するとよい
+    * ただディレクトリはたくさんできる。
+    * YAML もようけ増える。仕方なし。。。
+    * 値系は別 YAML に隔離するとよい。
+  * ロールは細かくわけよう
 
 ---
 
@@ -632,18 +650,10 @@ class: center, middle
 
 ## 資料はこちら
 
-* ソースコード  
-  https://github.com/knjname/2018-03_IntroductionToAnsible
+* ソースコード、資料  
+  https://github.com/knjname/2018-04_IntroductionToAnsible
 * スライド  
-  https://knjname.github.io/2018-03_IntroductionToAnsible/
-
----
-
-## Q and A
-
-### Q. XXX
-
-A. XXX
+  https://knjname.github.io/2018-04_IntroductionToAnsible/
 
 ---
 

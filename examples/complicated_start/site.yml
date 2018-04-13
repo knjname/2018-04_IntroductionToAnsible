@@ -6,6 +6,11 @@
     - common
 
 - name: setup web hosts
-  hosts: web_front
+  hosts: web_servers
   roles:
     - php
+
+- name: setup web hosts
+  hosts: db_servers
+  roles:
+    - db

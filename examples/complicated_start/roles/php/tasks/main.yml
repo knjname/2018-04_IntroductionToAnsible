@@ -9,6 +9,7 @@
     - php
 
 - name: enable httpd
+  become: true
   systemd:
     name: httpd
     enabled: yes

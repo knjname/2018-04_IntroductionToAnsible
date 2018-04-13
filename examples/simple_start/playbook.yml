@@ -16,7 +16,7 @@
     # PostgreSQL をインストール
     - name: install postgresql
       yum:
-        name: postgresql
+        name: postgresql-server
         state: present
     # Firewalld で 5432 をオープン
     - name: open postgresql port
@@ -55,11 +55,10 @@
         - 8080
 
 - hosts: web_server
-  become: false
   tasks:
     # アプリのアップロード
     - name: upload app
-      become: false
+      become: true
       copy:
         src: my_php_app
         dest: /var/www/html

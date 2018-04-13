@@ -1,10 +1,7 @@
-[web_front]
+[web_servers]
 stg_webserver_0 ansible_host=192.168.55.10 ansible_ssh_private_key_file=.vagrant/machines/{{inventory_hostname}}/virtualbox/private_key
 
-[web_api]
-stg_webserver_0 ansible_host=192.168.55.10 ansible_ssh_private_key_file=.vagrant/machines/{{inventory_hostname}}/virtualbox/private_key
-
-[db_master]
+[db_servers]
 stg_dbserver_0 ansible_host=192.168.55.100 ansible_ssh_private_key_file=.vagrant/machines/{{inventory_hostname}}/virtualbox/private_key
 
 [all:vars]
