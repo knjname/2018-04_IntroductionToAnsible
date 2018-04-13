@@ -1,7 +1,7 @@
 {
   "scripts": {
     "dev": "webpack-dev-server --hot --inline --open",
-    "publish": "webpack"
+    "dist": "webpack"
   },
   "devDependencies": {
     "html-webpack-plugin": "^2.30.1",

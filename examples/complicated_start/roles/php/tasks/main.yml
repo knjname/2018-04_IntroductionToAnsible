@@ -1,0 +1,26 @@
+---
+- name: install httpd and php
+  become: true
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - httpd
+    - php
+
+- name: enable httpd
+  systemd:
+    name: httpd
+    enabled: yes
+    state: started
+
+- name: open up http ports
+  become: true
+  firewalld:
+    port: "{{item}}/tcp"
+    state: enabled
+    immediate: true
+    permanent: on
+  with_items:
+    - 80
+    - 443

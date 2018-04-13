@@ -18,9 +18,9 @@ by Kenji Saitou
 * サーバ構成で忘れ物がある人
   * 複数台セットアップで抜け漏れマン 😅
 * 自動化大好きマン
-* Linux は普通程度には知ってる
+* Linux は普通程度には知ってる。SSH の知識はある。
 
-特に深く掘り下げず、導入をしていきます。
+**特に深く掘り下げず、入り口に立っていくことが目的です。**
 
 ---
 
@@ -36,7 +36,9 @@ class: center, middle
 * 🐶 「了解。」
 * 🐶 （一つ一つ TeraTerm 繋げて設定するの面倒だな…）
 
-> 手順 1. SCP で資材をアップロードする。手順 2. Teraterm (TTLogMe) で SSH ログインする。手順 3. `cd /opt/foobar` をする。
+> * 手順 1. SCP で資材をアップロードする。
+> * 手順 2. Teraterm (TTLogMe) で SSH ログインする。
+> * 手順 3. `cd /opt/foobar` をする。
 
 …あ、もういいです。お腹いっぱいです。
 
@@ -66,6 +68,8 @@ class: center, middle
   * 環境のバリエーション、いくつあると思っている？
   * サブシステム、いくつあると思っている？
 
+マトリクスで 30 超える数のデプロイが本番環境だけで必要というプロジェクトも多いのでは？
+
 ---
 
 ## サーバに個性はいらない
@@ -78,6 +82,8 @@ class: center, middle
 * 中途半端な作業
   1. 😸 「`/etc/hosts` に今回新しく追加したホストを追加したろ」
   2. 😸 「 サーバ A はこれに影響されるけど、サーバ B は、まあ、…ええやろ 」
+
+いつでも減らせる、いつでも増やせる、いつでも作り直せる
 
 ---
 
@@ -104,7 +110,7 @@ class: center, middle
 
 ---
 
-## 沿革
+## Ansible 沿革
 
 * 公式サイト: https://www.ansible.com/
 * ソースコード: https://github.com/ansible/ansible
@@ -121,6 +127,7 @@ class: center, middle
   * あるべき姿: apache がインストールされて動いている
   * あるべき姿: chrony がインストールされている
   * あるべき姿: こちらで管理しているファイルが `/etc/xxx/xxx.conf` に入っている
+* 注意：サーバの知識が要らなくなるわけではない。
 
 ---
 
@@ -128,7 +135,7 @@ class: center, middle
 
 * `ssh` でできることはできる。できないことはできない。
   * 基本的には CLI 操作の自動化しかできない。
-    * GUI / インタラクティブ前提は滅びてください
+    * GUI / インタラクティブ前提は滅びてください。
 
 ---
 
@@ -150,7 +157,7 @@ class: center, middle
 * サーバ側にエージェントが不要 (エージェントレス)
   * 一番の利点。単純に始めやすい
   * サーバが SSH で入れて、Python が入っていれば OK。
-    * Windows でも動きます。
+  * Windows をマネージしたい場合は、PowerShell / [WinRM](<https://msdn.microsoft.com/ja-jp/library/aa384426(v=vs.85).aspx>) など必要。
 * プログラミング出てこない
   * ほぼ YAML で記述。要するに JSON や XML の仲間みたいなので記述。
     * 凝ったことをやろうとすると、設定ファイルでプログラミングするようなイメージになる。
@@ -159,23 +166,30 @@ class: center, middle
   * ノンプログラマーも懐柔しやすいのでは？
 * シンプル
   * 色々な仕組みはあるものの、最終的には上から下に SSH 上で操作をしていくスタイルに近い。
-* 人気がある （**一番大事**）
 
 ---
 
-## 向き・不向き
+class: center, middle, large
 
-### 向いている
+**一番の利点は<br/>人気があること**
+
+---
+
+## Ansible たぶん 向いている
 
 * 大量のホストを一括管理したい
   * 特にクラウド環境
 * サーバのセットアップをコードとして文書化したい
 
-### 向いていない
+---
+
+## Ansible たぶん 向いていない
 
 * やたら凝ったセットアップが必要なサーバには不向き
   * FB チャネルでネットワークストレージをボリュームに追加して再起動云々みたいな手順は管理できないと思う
+  * クラウドで提供される VM みたいな層以上の自動化にしか使えない
 * すごい特殊な環境には不向き
+* 本番環境がすごいオフライン
 * ログインを自動化できない
   * いちいちパスワード入力が必要なケース
 
@@ -188,29 +202,38 @@ class: center, middle
 
 現段階では汎用の Linux を自動的に管理するのには向いています。
 
+おそらく Ansible の可能性を引き出せないケースであっても初期セットアップには使えるケースは多いと思います。
+
+```
+難易度
+
+初期インフラセットアップのみ
+  ＜ 継続的なインフラ管理
+  ＜ アプリのリリースごと
+  ＜ CI / CD
+```
+
 ---
 
 class: center, middle
 
-# Ansible をはじめる
-
-（準備編）
+# Ansible をはじめる<br/>（準備編）
 
 ---
 
 ## Ansible で使用される言語
 
-下記についての知識があると Ansible をやるのに、不自由しないでしょう。
+下記についての知識があると Ansible で不自由しないでしょう。
 
 1. YAML (`*.yml` or `*.yaml`)
+   * 木構造のデータを多少のデータ型を交えながら書く Perl 界隈発祥のデータ記法。
    * Ansible の構成ファイル、設定値など全てこの形式が使われます。
-   * 木構造のデータを多少の型を交えながら書く Perl 界隈発祥のデータ記法。
    * JSON とほぼ等価だと思えばいいです。 (JSON よりは記述力は上)
-   * [http://magazine.rubyist.net/?0009-YAML](http://magazine.rubyist.net/?0009-YAML)
-   * Markdown と同じく、処理系でフレーバーが違うと思う
+   * [いい入門記事があるので](http://magazine.rubyist.net/?0009-YAML)、これを読めば OK。
+   * Markdown と同じく、処理系で解釈が多少違う。
 2. [Jinja2](http://jinja.pocoo.org/)
    * Python 用のテンプレートエンジン。 Velocity, ERB, Smarty の仲間みたいなもんです。
-   * YAML の中に `"{{ Jinja2 テンプレート }}"` のように記述して使うことが多いです。
+   * YAML の中に `"{{ variable_name }}"` のように記述して使うことが多いです。
    * ループ変数、環境変数、などの記述用
 3. ini ファイル
    * Windows とかで使われているやつと大差ない。まあ、雰囲気でわかる。
@@ -234,16 +257,14 @@ true # 真偽値: true(on) / false(off)
 |
   複数行の
   文字列も
-  書ける（先頭のスペースは必要だが入らない）
+  書ける（各行の先頭インデントは必要だが、全てトリムされる）
 ```
 
 ---
 
 ## かんたん YAML マスター
 
-### コレクション
-
-#### リスト
+### リスト
 
 ```yaml
 # ブロックスタイル
@@ -254,18 +275,22 @@ true # 真偽値: true(on) / false(off)
 [listItem01, listItem02]
 ```
 
-#### マップ
+### マップ
 
 ```yaml
+# ブロックスタイル
 mapKey1: mapValue1
 mapKey2: mapValue2
 ---
+# フロースタイル
 { mapKey1: mapValue1, mapKey2: mapValue2 }
 ```
 
 ---
 
-### 複合
+## かんたん YAML マスター
+
+### リストとマップの複合
 
 ```yaml
 - mapKey1: mapValue1
@@ -281,9 +306,13 @@ services:
 
 ---
 
+## かんたん YAML マスター
+
 ### ドキュメント
 
-XML でいえば、複数のルート要素、JSON でいえば、複数の JSON ドキュメントを 1 ファイルに記述する機能。
+ドキュメント ＝ 1 つの YAML ツリーデータ。XML でいえば、ルート要素にあたる。
+
+YAML ではこれを `---` で区切ることにより複数持つことができる。
 
 ```yaml
 # 以下は3ドキュメント構成。 --- が区切り。
@@ -298,13 +327,16 @@ mapKey1: mapValue2
 
 ---
 
+## かんたん YAML マスター
+
 ### エイリアス定義＆参照
 
 ```yaml
 - &foobar "さくらんぼー！"
-- "（>Д<（ ＊ ） ひ、ひぎぃー！"
+- "ひ、ひぎぃー！"
 - *foobar
-# => ["さくらんぼー！", "（>Д<（ ＊ ） ひ、ひぎぃー！", "さくらんぼー！"]
+
+# => ["さくらんぼー！", "ひ、ひぎぃー！", "さくらんぼー！"]
 ```
 
 ---
@@ -315,9 +347,10 @@ mapKey1: mapValue2
   * ドキュメントそのものはマップ・リスト・リテラルどれでもよい
   * ただ Ansible の範囲では、複数のドキュメントとかは使わない。
 * 見やすい
-  * XML よりも。（XML はツリー構造じゃなくて `一部を<a>リンク</a>にしたり`　する記法が特別に得意。周辺技術も揃っているのが特徴）
+  * XML よりも。
+    * 余談だけれども、XML はツリー構造じゃなくて一部を `<a>リンク</a>` にしたりする記法が特別に得意。周辺技術も揃っているのもいい。
 * 書きやすい
-  * コメントを許さない JSON よりも。
+  * JSON なんかはコメントが入れられないのがキツイ。
 * 表現力がある
   * いろいろな機能があるらしいですが、把握している人、いる？
 
@@ -325,12 +358,15 @@ mapKey1: mapValue2
 
 ### YAML を知っておくといいこと
 
-* 割りと色々な場面で使われていて潰しは効く
-  * docker-compose / SpringBoot / CloudFormation
-* あの日輝いていた XML は死んだ
-* 競合するフォーマットに [TOML](https://github.com/toml-lang/toml)
+* 割りと色々な場面で使われていて知識として潰しは効く
+  * docker-compose / SpringBoot / CloudFormation / Google Cloud Deployment Manager
+* 普及率
+  * あの日輝いていた XML は死んだ
+  * JSON も人が手書きするフォーマットとしては死につつある （私の偏見）
+* 最近人気の競合フォーマットとして [TOML](https://github.com/toml-lang/toml) がある
   * ini っぽいやつ
-* Ansible を使う上では、結局 Ansible が YAML を読んで何を解釈しているか理解できていたほうがスムーズ。（Ansible がどこを高度に解釈して応用しているかわかる）
+
+Ansible を使う上では、結局 Ansible が YAML を読んで何を解釈しているか理解できていたほうがスムーズ。（Ansible がどこを高度に解釈して応用しているかわかる）
 
 ---
 
@@ -344,6 +380,7 @@ mapKey1: mapValue2
 
 * いろいろあるけど、だいたい YAML 中や設定のテンプレートファイル中で `{{ variable_name }}` みたいなのしか使わない。
   * `{{ ... }}` という記法がモロに YAML とぶつかるので、Ansible では常に `"{{ ... }}"` のように明示的に文字列リテラルの中に書く。
+* 僕もあんまり詳しくないけど凝ったことやろうとすると、知る必要が出て来るイメージ。
 
 ---
 
@@ -362,11 +399,11 @@ $ sudo pip install ansible
 
 class: center, middle
 
-# Ansible をはじめる
-
-（シンプルスタート編）
+# Ansible をはじめる<br />シンプルスタート編
 
 ---
+
+## シンプルスタート
 
 かなり前置きが長くなってしまいましたが、まずはシンプルに Ansible を使い始めてみましょう。
 
@@ -374,7 +411,7 @@ class: center, middle
 
 ## マシン準備
 
-遊び相手として CentOS \* 2 を用意します。
+遊び相手として CentOS \* 2 を Vagrant(VirtualBox)で用意します。
 
 ```console
 $ cd examples/simple_start
@@ -417,13 +454,28 @@ $ ansible -m command -a "uuid" web_server
 
 ## サーバの構成管理をしてみる
 
-下記のファイルの設定を確認しましょう。
+`playbook.yml` など を確認しましょう。
 
-```
-playbook.yml
+```yaml
+---
+
+# 構成はプレイブックというYAMLファイルに記述していく。
+- hosts: all
+  become: true
+  tasks:
+    # Fiwewalld を有効化
+    - name: enable firewalld
+      systemd:
+        name: firewalld
+        enabled: yes
+        state: started
 ```
 
-コマンドを流してみましょう。
+---
+
+## サーバの構成管理をしてみる
+
+プレイブックを流すコマンドを流してみましょう。
 
 ```console
 $ ansible-playbook playbook.yml
@@ -440,10 +492,10 @@ http://192.168.50.2/my_php_app/
 ## シンプル編 まとめ
 
 * Ansible で扱うエンティティ
-  * ホスト
-  * タスク
-  * [モジュール](http://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html), e.g. `yum` とか
-  * インベントリ = `hosts`
+  * [モジュール](http://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html)  
+    e.g. `yum` とか
+  * インベントリ = `hosts`  
+    物理的なサーバホストの記述とグルーピングやらはここに書く
   * プレイブック = `playbook.yml`
 * Ansible 実行をスムーズにするためには...
   * Ansible 用ユーザを用意しておく
@@ -454,52 +506,103 @@ http://192.168.50.2/my_php_app/
 
 class: center, middle
 
-# Ansible をはじめる
-
-（やや複雑編）
+# Ansible をはじめる<br />（やや複雑編）
 
 ---
 
-## やや複雑編
+## 🐸 やや複雑編
 
-もう少しややこしい設定のサーバ群を立ち上げてみます。
+もう少し多いサーバ群を構成してみます。
 
-* ステージング
+* ステージング (stg)
   * Web \* 1
   * DB \* 1
-* 本番
+* 本番 (prd)
   * Web \* 4
   * DB \* 2
 
-立ち上げは前回と同様 `vagrant up` （8 台なので時間がかかります）
+立ち上げは前回と同様に行います。 （8 台なので時間がかかります）
+
+```console
+$ cd examples/complicated_start
+$ vagrant up
+```
 
 ---
 
-## 🐸 の大合唱
+## 🐸 大合唱
 
 複数台のマシンで一気にモジュールを実行してみましょう。
 
 ```console
+# ステージング 2台 に一気に実行
 $ ansible -i inventories/staging/hosts -m ping all
+
+# 本番 6台 に一気に実行
 $ ansible -i inventories/production/hosts -m ping all
+```
+
+---
+
+## 🐸 環境ごとのプレイブック反映
+
+環境ごとにプレイブックを反映させていきましょう。
+
+（通常は結合 → ステージング → 本番の順に構成の適用が問題ないか試験しつつスライドすることになります。）
+
+```console
+# ステージング 2台
+$ ansible-playbook -i inventories/staging/hosts site.yml
+
+# 本番 6台 に一気に実行
+$ ansible-playbook -i inventories/production/hosts site.yml
 ```
 
 ---
 
 class: center, middle
 
-# 私の場合
+# 私と Ansible
 
 ---
 
-## 実際に案件に Ansible 放り込んでます
+## 実際に案件に Ansible 放り込んでます (2018/01〜)
 
-### 前提
-
-* 基本的にアプリは Docker で構成
+* 基本的にアプリは Docker + docker-compose で構成。
+  * DB などミドルウェア含めてほぼ全て Docker で動く。
+  * 全サーバで Docker / docker-compose を使えるように構成。
+  * トラブルシューティング、性能監視系、バックアップ系で必要なツールやパッケージも全サーバにインストール。
 * よくある (?) フロント + API サーバ + DB サーバ + バッチ + α みたいな構成
+  * それぞれの単位で `/opt/foobar/<コンポーネント名>` というパスのディレクトリの下に資材やデータを置いて管理している
+    * Ansible でそれぞれロールごとに独立してインストールできるようにルールを作った
+* どういう構成になっているのかドキュメントがわりになる。
 
-* Docker の設定ファイルとなる `docker-`アプリの
+---
+
+## 開発環境サーバも Ansible で構成しています
+
+* GCP で VM たててその上に前述と同じような形で Ansible セットアップ。
+* 下記のサービスを構築してある。（それぞれに専用サブドメインをふってある）
+  * LDAP
+  * Jenkins
+  * Gitlab
+  * Subversion
+  * Rocket.Chat
+  * Redmine
+  * Nexus
+* 全部 Let's encrypt で取得した証明書で HTTPS(HTTP2.0)でセキュアにアクセス可能にした
+  * Let's encrypt の証明書取得はローカルで、アップロードと有効化は Ansible で。
+* 他案件にも流用可能かな
+
+---
+
+## 出会い始めのころの思い出
+
+* 適当にプレイブックを作って管理がつらくなって爆死した
+  * [Ansible ベストプラクティス](http://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html) に沿えば大丈夫
+    * ただディレクトリはたくさんできる
+    * YAML もよう増える 仕方なし
+    * 値系は別 YAML に隔離するとよい
 
 ---
 
@@ -509,17 +612,30 @@ class: center, middle
 
 ---
 
+## まとめ
+
+* Ansible はシンプルでわかりやすい
+* エージェントレスなので始める際の障壁が少ない
+* 身近なところから始めたらどうだろうか？
+  * 開発環境
+  * 本番サーバの初期セットアップ
+
+---
+
 ## 学びたい人向けへの資源
 
-* [Ansible 実践ガイド](https://www.amazon.co.jp/dp/B01NAH7NAA/)
-  * これしか買ってないけど、普通に知りたいことは網羅されているし、内容も満足。
+[Ansible 実践ガイド](https://www.amazon.co.jp/dp/B01NAH7NAA/)
+
+普通に知りたいことは網羅されている。これさえあれば大丈夫。
 
 ---
 
 ## 資料はこちら
 
-* https://github.com/knjname/2017-07_IntroductionToJenkins
-* https://knjname.github.io/2017-07_IntroductionToJenkins/
+* ソースコード  
+  https://github.com/knjname/2018-03_IntroductionToAnsible
+* スライド  
+  https://knjname.github.io/2018-03_IntroductionToAnsible/
 
 ---
 

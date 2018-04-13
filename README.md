@@ -11,11 +11,11 @@ $ yarn
 ### スライドを開発する
 
 ```console
-$ yarn run dev
+$ yarn dev
 ```
 
 ### スライドを発行する
 
 ```console
-$ yarn run publish
+$ yarn dist
 ```

@@ -4,3 +4,8 @@
   hosts: all
   roles:
     - common
+
+- name: setup web hosts
+  hosts: web_front
+  roles:
+    - php
